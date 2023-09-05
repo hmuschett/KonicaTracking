@@ -1,12 +1,43 @@
-﻿using Microsoft.EntityFrameworkCore;
-namespace KonicaTracking.Data.Model
+﻿using KonicaTracking.Services.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace KonicaTracking.Data.Models
 {
     /// <summary>
     /// Represents a historical record of a location with latitude and longitude coordinates at a specific date and time.
     /// This class inherits from the base class 'Location'.
     /// </summary>
-    public class LocationHistory : Location
+    public class LocationHistory : ILocation
     {
+        /// <summary>
+        /// Initialize a new empty instance of <see cref="LocationHistory"/> class.
+        /// </summary>
+        public LocationHistory() { }
+
+        /// <summary>
+        /// Initialize a new instance of <see cref="LocationHistory"/> class.
+        /// </summary>
+        /// <param name="location">Location contract.</param>
+        public LocationHistory(ILocation location)
+        {
+            Date = DateTime.Now;
+            Latitude = location.Latitude;
+            Longitude = location.Longitude;
+        }
+
+        /// <summary>
+        /// Gets or sets the unique identifier of the location.
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <inheritdoc />
+        public DateTime Date { get; set; }
+
+        /// <inheritdoc />
+        public decimal Latitude { get; set; }
+
+        /// <inheritdoc />
+        public decimal Longitude { get; set; }
 
         /// <summary>
         /// Configures the entity mapping for the 'Order' model, specifying the table name as 'Orders'.
@@ -46,6 +77,5 @@ namespace KonicaTracking.Data.Model
                 .HasColumnOrder(30)
                 .IsRequired();
         }
-
     }
 }

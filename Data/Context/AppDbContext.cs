@@ -1,4 +1,4 @@
-﻿using KonicaTracking.Data.Model;
+﻿using KonicaTracking.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace KonicaTracking.Data.Context
@@ -9,7 +9,7 @@ namespace KonicaTracking.Data.Context
     public class AppDbContext : DbContext
     {
         /// <summary>
-        /// Inicitalize a new instance of <see cref="ApplicationDC"/> class.
+        /// Inicitalize a new instance of <see cref="AppDbContext"/> class.
         /// </summary>
         /// <param name="options"></param>
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
@@ -30,8 +30,8 @@ namespace KonicaTracking.Data.Context
             Order.Configure(modelBuilder);
             Vehicle.Configure(modelBuilder);
 
-            this.SeedLocations(modelBuilder);
-            this.SeedVehicles(modelBuilder);
+            SeedLocations(modelBuilder);
+            SeedVehicles(modelBuilder);
         }
 
         /// <summary>
@@ -97,4 +97,3 @@ namespace KonicaTracking.Data.Context
         public DbSet<Vehicle> Vehicles { get; set; }
     }
 }
-

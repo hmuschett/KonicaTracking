@@ -1,4 +1,4 @@
-﻿using KonicaTracking.Data.Model;
+﻿using KonicaTracking.Services.Models;
 
 namespace KonicaTracking.Data.Contracts
 {
@@ -11,6 +11,6 @@ namespace KonicaTracking.Data.Contracts
         /// Asynchronously retrieves a collection of all vehicles.
         /// </summary>
         /// <returns>A task that represents the asynchronous operation and contains a collection of vehicles.</returns>
-        Task<ICollection<Vehicle>> GetAllAsync();
+        Task<ICollection<IVehicle>> GetAllAsync();
     }
 }

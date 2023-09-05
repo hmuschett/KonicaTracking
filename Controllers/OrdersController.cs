@@ -1,49 +1,60 @@
-﻿using KonicaTracking.Data.Model;
+﻿using KonicaTracking.Data.Contracts;
+using KonicaTracking.Data.Models;
+using KonicaTracking.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KonicaTracking.Controllers
 {
-
-    [ApiController]
-    [Route("[controller]")]
-    public class OrdersController : ControllerBase
+    public record NewOrder
     {
-        private static List<Order> Orders = new List<Order>();
-        private static int currentOrderId = 1;
+        /// <summary>
+        /// Gets or sets the description of the order.
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the id vehicle.
+        /// </summary>
+        public int AssignedVehicleId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the status of the order.
+        /// </summary>
+        public OrderStatus Status { get; private set; } = OrderStatus.Placed;
+    }
+
+    /// <summary>
+    /// Controller with orders endpoints.
+    /// </summary>
+    [ApiController]
+    [Route("api/orders")]
+    public class OrdersController : Controller
+    {
+        private readonly IOrdersRepository _ordersRepository;
+
+        /// <summary>
+        /// Initialize a new instance of <see cref="OrdersController"/> class.
+        /// </summary>
+        /// <param name="loggerManager"></param>
+        /// <param name="ordersRepository"></param>
+        public OrdersController( IOrdersRepository ordersRepository)
+        {
+            _ordersRepository = ordersRepository;
+        }
 
         [HttpPost]
-        public IActionResult Post(Order order)
+        [Route("add")]
+        public async Task<ActionResult<MessageResponse<String>>> AddOrder([FromBody] OrderResponse newOrder)
         {
-            order.Id = currentOrderId++;
-            Orders.Add(order);
-            return Created($"api/orders/{order.Id}", order);
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            var order = Orders.FirstOrDefault(o => o.Id == id);
-            if (order == null)
+            try
             {
-                return NotFound();
+                if (await _ordersRepository.CreateOrderAsync(newOrder)) return Ok(MessageResponse<String>.Success($"Se ha guardado la nueva orden."));
+                return Ok(MessageResponse<String>.Fail($"No se ha podido guardar el pedido y se desconoce la causa."));
             }
-            Orders.Remove(order);
-            return NoContent();
-        }
-
-        [HttpGet("{id}/location")]
-        public IActionResult GetLocation(int id)
-        {
-            var order = Orders.FirstOrDefault(o => o.Id == id);
-            if (order == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return BadRequest(MessageResponse<String>.Fail($"No se ha podido guardar el pedido."));
             }
-            return Ok(new
-            {
-                OrderLocation = order.AssignedVehicle.CurrentLocation,
-                Vehicle = order.AssignedVehicleId
-            });
         }
     }
 }

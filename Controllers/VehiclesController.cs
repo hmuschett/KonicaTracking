@@ -1,8 +1,9 @@
 ﻿using KonicaTracking.Data.Contracts;
-using KonicaTracking.Data.Model;
-using KonicaTracking.Models;
-using Microsoft.AspNetCore.Http;
+using KonicaTracking.Data.Models;
+using KonicaTracking.Models.Response;
+
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace KonicaTracking.Controllers
 {
@@ -27,21 +28,29 @@ namespace KonicaTracking.Controllers
         /// <returns>An asynchronous task that represents the action's result, which contains a collection of vehicles.</returns>
         [HttpGet]
         [Route("all")]
-        public async Task<ActionResult<MessageResponse<ICollection<Vehicle>>>> AllVehiclesAsync()
+        public async Task<ActionResult<MessageResponse<ICollection<VehicleResponse>>>> AllVehiclesAsync()
         {
+            
             try
             {
-                // ToDo: No enviar la clase Vehicle como respuesta.
-                var vehicles = await _vehiclesRepository.GetAllAsync();
-                return Ok(MessageResponse<ICollection<Vehicle>>.Success(vehicles));
+                // Repository response.
+                var repositoryResponse = await _vehiclesRepository.GetAllAsync();
+
+                // ICollection to response.
+                ICollection<VehicleResponse> vehicles = new List<VehicleResponse>();
+                repositoryResponse.ToList().ForEach(v =>
+                {
+                    vehicles.Add(new VehicleResponse(v));
+                });
+
+                return Ok(MessageResponse<ICollection<VehicleResponse>>.Success(vehicles));
             }
             catch (Exception ex)
             {
                 //ToDo: Implementar el logger
-                Console.WriteLine(ex);
+               
                 return BadRequest(MessageResponse<String>.Fail("No se pudo obtener el listado de vehiculos."));
             }
         }
     }
-
 }

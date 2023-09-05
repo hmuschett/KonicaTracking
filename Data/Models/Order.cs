@@ -1,35 +1,72 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KonicaTracking.Services.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace KonicaTracking.Data.Model
+namespace KonicaTracking.Data.Models
 {
+    /// <summary>
+    /// Represents the possible status values of an order.
+    /// </summary>
+    public enum OrderStatus
+    {
+        /// <summary>
+        /// The order has been placed but not yet in transit.
+        /// </summary>
+        Placed,
+
+        /// <summary>
+        /// The order is in transit.
+        /// </summary>
+        InTransit,
+
+        /// <summary>
+        /// The order has been delivered.
+        /// </summary>
+        Delivered,
+
+        /// <summary>
+        /// The order has been canceled.
+        /// </summary>
+        Canceled
+    }
+
     /// <summary>
     /// Represents an order with an identifier, description, assigned vehicle, and status.
     /// </summary>
-    public class Order
+    public class Order : IOrder
     {
+        /// <summary>
+        /// Initialize a new empty instance of <see cref="Order"/> class.
+        /// </summary>
+        public Order() { }
+
+        /// <summary>
+        /// Initialize a new instance of <see cref="Order"/> class.
+        /// </summary>
+        /// <param name="order">Order contract.</param>
+        public Order(IOrder order)
+        {
+            Description = order.Description;
+            AssignedVehicleId = order.AssignedVehicleId;
+            AssignedVehicleObject = (Vehicle)order.AssignedVehicle;
+            Status = order.Status;
+        }
+
         /// <summary>
         /// Gets or sets the unique identifier of the order.
         /// </summary>
         public int Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the description of the order.
-        /// </summary>
+        /// <inheritdoc />
         public string Description { get; set; }
 
-        /// <summary>
-        /// Gets or sets the id vehicle.
-        /// </summary>
+        /// <inheritdoc />
         public int? AssignedVehicleId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the vehicle assigned to fulfill the order.
-        /// </summary>
-        public virtual Vehicle? AssignedVehicle { get; set; }
+        /// <inheritdoc />
+        public virtual IVehicle? AssignedVehicle => AssignedVehicleObject;
+        public virtual Vehicle? AssignedVehicleObject { get; set; }
 
-        /// <summary>
-        /// Gets or sets the status of the order.
-        /// </summary>
+        /// <inheritdoc />
         public OrderStatus Status { get; set; }
 
         /// <summary>
@@ -61,8 +98,8 @@ namespace KonicaTracking.Data.Model
                 .HasColumnOrder(20);
 
             modelBuilder.Entity<Order>()
-                .HasOne(o => o.AssignedVehicle)
-                .WithMany(v => v.Orders)
+                .HasOne(o => o.AssignedVehicleObject)
+                .WithMany(v => v.OrdersCollection)
                 .HasForeignKey(o => o.AssignedVehicleId);
 
             modelBuilder.Entity<Order>()
@@ -72,32 +109,6 @@ namespace KonicaTracking.Data.Model
                 .HasColumnOrder(30)
                 .IsRequired();
         }
-    }
-   
-    /// <summary>
-    /// Represents the possible status values of an order.
-    /// </summary>
-    public enum OrderStatus
-    {
-        /// <summary>
-        /// The order has been placed but not yet in transit.
-        /// </summary>
-        Placed,
-
-        /// <summary>
-        /// The order is in transit.
-        /// </summary>
-        InTransit,
-
-        /// <summary>
-        /// The order has been delivered.
-        /// </summary>
-        Delivered,
-
-        /// <summary>
-        /// The order has been canceled.
-        /// </summary>
-        Canceled
     }
 
 }

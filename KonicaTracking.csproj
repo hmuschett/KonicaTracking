@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>f3280f95-e91f-41ae-a2b3-147c51fe31b2</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -25,8 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Context\" />
-    <Folder Include="Data\Contrats\" />
     <Folder Include="Data\Register\" />
   </ItemGroup>
 

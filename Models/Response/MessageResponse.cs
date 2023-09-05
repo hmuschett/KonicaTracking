@@ -1,5 +1,5 @@
-﻿namespace KonicaTracking.Models
-{   
+﻿namespace KonicaTracking.Models.Response
+{
     /// <summary>
     /// Manage message response.
     /// </summary>
@@ -48,5 +48,4 @@
             return messageResponse;
         }
     }
-    
 }

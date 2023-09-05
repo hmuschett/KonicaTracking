@@ -1,6 +1,5 @@
-﻿
-using KonicaTracking.Data.Context;
-using KonicaTracking.Data.Model;
+﻿using KonicaTracking.Data.Context;
+using KonicaTracking.Services.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace KonicaTracking.Data.Contracts.Implementations
@@ -22,10 +21,11 @@ namespace KonicaTracking.Data.Contracts.Implementations
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<Vehicle>> GetAllAsync()
+        public async Task<ICollection<IVehicle>> GetAllAsync()
         {
-            var vehicles = _context.Vehicles.AsQueryable().Include(x => x.CurrentLocation);
-            return await vehicles.ToListAsync();
+            var vehicles = _context.Vehicles.AsQueryable().Include(x => x.CurrentLocationObject);
+            ICollection<IVehicle> ivehicles = await vehicles.Cast<IVehicle>().ToListAsync();
+            return ivehicles;
         }
     }
 }

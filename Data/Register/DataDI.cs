@@ -1,5 +1,5 @@
-﻿using KonicaTracking.Data.Contracts.Implementations;
-using KonicaTracking.Data.Contracts;
+﻿using KonicaTracking.Data.Contracts;
+using KonicaTracking.Data.Contracts.Implementations;
 
 namespace KonicaTracking.Data.Register
 {
@@ -16,6 +16,7 @@ namespace KonicaTracking.Data.Register
         public static IServiceCollection AddDependencies(this IServiceCollection services)
         {
             services.AddScoped<IVehiclesRepository, VehiclesRepositoy>();
+            services.AddScoped<IOrdersRepository, OrdersRepository>();
             return services;
         }
     }
