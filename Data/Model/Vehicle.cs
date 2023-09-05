@@ -2,6 +2,9 @@
 
 namespace KonicaTracking.Data.Model
 {
+    /// <summary>
+    /// Represents a vehicle entity.
+    /// </summary>
     public class Vehicle
     {
         /// <summary>
@@ -32,7 +35,7 @@ namespace KonicaTracking.Data.Model
         /// <summary>
         /// Gets or sets the current location of the vehicle.
         /// </summary>
-        public virtual Location CurrentLocation { get; set; }
+        public virtual CurrentLocation CurrentLocation { get; set; }
 
         /// <summary>
         /// Configures the entity mapping for the 'Vehicle' model, specifying the table name as 'Vehicles'.
@@ -70,8 +73,11 @@ namespace KonicaTracking.Data.Model
 
             modelBuilder.Entity<Vehicle>()
                 .HasOne(o => o.CurrentLocation)
-                .WithOne()
-                .HasForeignKey<Vehicle>(v => v.Id);
+                .WithOne();
+
+            modelBuilder.Entity<Vehicle>()
+                .HasMany(lh => lh.LocationHistory)
+                .WithOne();
         }
-    }
+    }    
 }

@@ -2,6 +2,9 @@
 
 namespace KonicaTracking.Data.Model
 {
+    /// <summary>
+    /// Represents an order with an identifier, description, assigned vehicle, and status.
+    /// </summary>
     public class Order
     {
         /// <summary>
@@ -70,7 +73,7 @@ namespace KonicaTracking.Data.Model
                 .IsRequired();
         }
     }
-
+   
     /// <summary>
     /// Represents the possible status values of an order.
     /// </summary>

@@ -3,7 +3,7 @@
     /// <summary>
     /// Register data layer dependency injections
     /// </summary>
-    public class DataDI
+    public static class DataDI
     {
         /// <summary>
         /// Configure and register the necessary dependencies in the application's dependency injection container.

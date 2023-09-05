@@ -1,36 +1,36 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 namespace KonicaTracking.Data.Model
 {
     /// <summary>
-    /// Represents a historical record of a location with latitude and longitude coordinates at a specific date and time.
+    /// Represents a current location with latitude and longitude coordinates at a specific date and time.
     /// This class inherits from the base class 'Location'.
     /// </summary>
-    public class LocationHistory : Location
+    public class CurrentLocation : Location
     {
-
         /// <summary>
-        /// Configures the entity mapping for the 'Order' model, specifying the table name as 'Orders'.
+        /// Configures the entity mapping for the 'CurrentLocation' model, specifying the table name as 'CurrentLocations'.
         /// </summary>
         /// <param name="modelBuilder">The ModelBuilder instance used to configure the entity mapping.</param>
-        public static void Configure_LocationHistory(ModelBuilder modelBuilder)
+        public static void Configure(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<LocationHistory>().ToTable("LocationsHistory");
-            modelBuilder.Entity<LocationHistory>().HasKey(lh => lh.Id);
+            modelBuilder.Entity<CurrentLocation>().ToTable("CurrentLocations");
+            modelBuilder.Entity<CurrentLocation>().HasKey(e => e.Id);
 
-            modelBuilder.Entity<LocationHistory>()
+            modelBuilder.Entity<CurrentLocation>()
                 .Property(l => l.Id)
-                .HasColumnName("LocationHistoryId")
+                .HasColumnName("CurrentLocationId")
                 .HasColumnOrder(0)
                 .ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<LocationHistory>()
+            modelBuilder.Entity<CurrentLocation>()
                 .Property(l => l.Date)
                 .HasColumnType("datetime")
                 .HasColumnName(nameof(Date))
                 .HasColumnOrder(10)
                 .IsRequired();
 
-            modelBuilder.Entity<LocationHistory>()
+            modelBuilder.Entity<CurrentLocation>()
                 .Property(l => l.Latitude)
                 .HasColumnType("decimal(10, 7)")
                 .HasPrecision(10, 7)
@@ -38,7 +38,7 @@ namespace KonicaTracking.Data.Model
                 .HasColumnOrder(20)
                 .IsRequired();
 
-            modelBuilder.Entity<LocationHistory>()
+            modelBuilder.Entity<CurrentLocation>()
                 .Property(l => l.Longitude)
                 .HasColumnType("decimal(10, 7)")
                 .HasPrecision(10, 7)
@@ -46,6 +46,5 @@ namespace KonicaTracking.Data.Model
                 .HasColumnOrder(30)
                 .IsRequired();
         }
-
     }
 }

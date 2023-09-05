@@ -20,7 +20,7 @@ namespace KonicaTracking.Controllers
         }
 
         [HttpPut("{id}/location")]
-        public IActionResult UpdateLocation(int id, Location location)
+        public IActionResult UpdateLocation(int id, CurrentLocation location)
         {
             var vehicle = Vehicles.FirstOrDefault(v => v.Id == id);
             if (vehicle == null)
