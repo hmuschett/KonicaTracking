@@ -1,43 +1,47 @@
-﻿using KonicaTracking.Data.Model;
+﻿using KonicaTracking.Data.Contracts;
+using KonicaTracking.Data.Model;
+using KonicaTracking.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KonicaTracking.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class VehiclesController : ControllerBase
+    [Route("api/vehicles")]
+    public class VehiclesController : Controller
     {
-        private static List<Vehicle> Vehicles = new List<Vehicle>();
-        private static int currentVehicleId = 1;
+        private readonly IVehiclesRepository _vehiclesRepository;
 
-        [HttpPost]
-        public IActionResult Post(Vehicle vehicle)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VehiclesController"/> class.
+        /// </summary>
+        /// <param name="vehiclesRepository">The repository for retrieving information about vehicles.</param>
+        public VehiclesController(IVehiclesRepository vehiclesRepository)
         {
-            vehicle.Id = currentVehicleId++;
-            Vehicles.Add(vehicle);
-            return Created($"api/vehicles/{vehicle.Id}", vehicle);
+            _vehiclesRepository = vehiclesRepository;
         }
 
-        [HttpPut("{id}/location")]
-        public IActionResult UpdateLocation(int id, CurrentLocation location)
+        /// <summary>
+        /// Retrieves a collection of all vehicles asynchronously.
+        /// </summary>
+        /// <returns>An asynchronous task that represents the action's result, which contains a collection of vehicles.</returns>
+        [HttpGet]
+        [Route("all")]
+        public async Task<ActionResult<MessageResponse<ICollection<Vehicle>>>> AllVehiclesAsync()
         {
-            var vehicle = Vehicles.FirstOrDefault(v => v.Id == id);
-            if (vehicle == null)
+            try
             {
-                return NotFound();
+                // ToDo: No enviar la clase Vehicle como respuesta.
+                var vehicles = await _vehiclesRepository.GetAllAsync();
+                return Ok(MessageResponse<ICollection<Vehicle>>.Success(vehicles));
             }
-            vehicle.CurrentLocation = location;
-            vehicle.LocationHistory.Add(new LocationHistory
+            catch (Exception ex)
             {
-                Id = vehicle.LocationHistory.Count + 1,
-                Date = DateTime.Now,
-                Latitude = location.Latitude,
-                Longitude = location.Longitude
-            });
-            return NoContent();
+                //ToDo: Implementar el logger
+                Console.WriteLine(ex);
+                return BadRequest(MessageResponse<String>.Fail("No se pudo obtener el listado de vehiculos."));
+            }
         }
-
     }
 
 }

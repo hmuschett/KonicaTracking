@@ -1,4 +1,7 @@
-﻿namespace KonicaTracking.Data.Register
+﻿using KonicaTracking.Data.Contracts.Implementations;
+using KonicaTracking.Data.Contracts;
+
+namespace KonicaTracking.Data.Register
 {
     /// <summary>
     /// Register data layer dependency injections
@@ -12,6 +15,7 @@
         /// <returns>The same collection of services with dependencies added.</returns>
         public static IServiceCollection AddDependencies(this IServiceCollection services)
         {
+            services.AddScoped<IVehiclesRepository, VehiclesRepositoy>();
             return services;
         }
     }

@@ -1,5 +1,6 @@
+using KonicaTracking.Data.Context;
+using KonicaTracking.Data.Register;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,15 +12,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Data context configuration.
-builder.Services.AddTransient<ApplicationDC>();
+//builder.Services.AddTransient<AppContext>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDC>(options =>
-{
-    options.UseSqlServer(connectionString);
-}, ServiceLifetime.Transient);
+builder.Services.AddDbContext<AppDbContext>(option =>
+    option.UseSqlServer(connectionString), ServiceLifetime.Transient);
 
 // Dependencies injection
-Data.Register.DataDI.AddDependencies(builder.Services);
+builder.Services.AddDependencies();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
