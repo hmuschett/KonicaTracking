@@ -1,7 +1,7 @@
 ﻿using KonicaTracking.Data.Contracts;
-using KonicaTracking.Data.Models;
 using KonicaTracking.Models.Request;
 using KonicaTracking.Models.Response;
+using KonicaTracking.Services.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KonicaTracking.Controllers
@@ -13,17 +13,17 @@ namespace KonicaTracking.Controllers
     [Route("api/orders")]
     public class OrdersController : Controller
     {
-        private readonly IOrdersRepository _ordersRepository;
         private readonly ILogger<OrdersController> _logger;
+        private readonly IOrdersRepository _ordersRepository;
 
         /// <summary>
-        /// Initialize a new instance of <see cref="OrdersController"/> class.
+        /// Initializes a new instance of the <see cref="OrdersController"/> class with the provided logger manager and orders repository.
         /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="ordersRepository"></param>
-        public OrdersController(ILogger<OrdersController> logger,IOrdersRepository ordersRepository)
+        /// <param name="loggerManager">The logger manager used for logging.</param>
+        /// <param name="ordersRepository">The repository for managing orders.</param>
+        public OrdersController(ILogger<OrdersController>loggerManager, IOrdersRepository ordersRepository)
         {
-            _logger = logger;
+            _logger = loggerManager;
             _ordersRepository = ordersRepository;
         }
 
@@ -34,12 +34,10 @@ namespace KonicaTracking.Controllers
         /// <returns>A message response indicating the result of the operation.</returns>
         [HttpPost]
         [Route("add")]
-        public async Task<ActionResult<MessageResponse<String>>> AddOrder([FromBody] OrderRequest newOrder)
+        public async Task<IActionResult> AddOrder([FromBody] OrderRequest newOrder)
         {
             try
             {
-                _logger.LogDebug($"Retrive all orders");
-                _logger.LogError($"Unhandled error when trying to save a new order. Message:");
                 if (await _ordersRepository.CreateOrderAsync(newOrder))
                     return Ok(MessageResponse<String>.Success($"The new order has been saved."));
                 return Ok(MessageResponse<String>.Fail($"The order could not be saved and the cause is unknown."));
@@ -59,13 +57,22 @@ namespace KonicaTracking.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
-            var result = await _ordersRepository.DeleteOrderAsync(id);
-            if (!result)
+            try
             {
-                return NotFound(MessageResponse<String>.Success("Order not found."));
-            }
+                var result = await _ordersRepository.DeleteOrderAsync(id);
+                if (!result)
+                {
+                    _logger.LogInformation("Order not found.");
+                    return NotFound(MessageResponse<String>.Fail($"Order not found."));
+                }
 
-            return NoContent(); // Devuelve un 204 No Content cuando la eliminación es exitosa.
+                return Ok(MessageResponse<String>.Success($"Order successfully deleted."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Unhandled error when trying to delete the order with id {id}. Message: {ex.Message}");
+                return BadRequest(MessageResponse<String>.Fail($"The order could not be deleted."));
+            }
         }
 
         /// <summary>
@@ -77,12 +84,21 @@ namespace KonicaTracking.Controllers
         [HttpPut("{orderId}/assign-vehicle/{vehicleId}")]
         public async Task<IActionResult> AssignVehicleToOrder(int orderId, int vehicleId)
         {
-            var result = await _ordersRepository.AssignVehicleToOrderAsync(orderId, vehicleId);
-            if (result)
+            try
             {
-                return Ok(MessageResponse<String>.Success("Vehicle assigned to order successfully." ));
+                var result = await _ordersRepository.AssignVehicleToOrderAsync(orderId, vehicleId);
+                if (result)
+                {
+                    return Ok(MessageResponse<String>.Success("Vehicle assigned to order successfully."));
+                }
+                _logger.LogInformation($"Order not found with id {orderId} and vehicle id {vehicleId}.");
+                return NotFound(MessageResponse<String>.Success("Order not found or failed to assign vehicle."));
             }
-            return NotFound(MessageResponse<String>.Success("Order not found or failed to assign vehicle."));
+            catch (Exception ex)
+            {
+                _logger.LogError($"Unhandled error when trying to save a new order. Message: {ex.Message}");
+                return BadRequest(MessageResponse<String>.Fail($"The order could not be saved."));
+            }
         }
 
         /// <summary>
@@ -91,19 +107,24 @@ namespace KonicaTracking.Controllers
         /// <param name="orderId">The ID of the order.</param>
         /// <returns>An IActionResult with the order and vehicle location or an error message.</returns>
         [HttpGet("{orderId}/location")]
-        public async Task<IActionResult> GetOrderAndVehicleLocation(int orderId)
+        public async Task<IActionResult> GetVehicleLocation(int orderId)
         {
-            var (order, vehicleLocation) = await _ordersRepository.GetOrderAndVehicleLocationAsync(orderId);
-            if (order == null || vehicleLocation == null)
+            try
             {
-                return NotFound(MessageResponse<String>.Success("Order or vehicle not found." ));
-            }
+                var vehicleLocation = await _ordersRepository.GetVehicleLocationAsync(orderId);
+                if (vehicleLocation == null)
+                {
+                    _logger.LogInformation("Order not found.");
+                    return NotFound(MessageResponse<String>.Success("Order or vehicle not found."));
+                }
 
-            return Ok(new
+                return Ok(MessageResponse<ILocation>.Success(vehicleLocation));
+            }
+            catch (Exception ex)
             {
-                Order = order,
-                VehicleLocation = vehicleLocation
-            });
+                _logger.LogError($"Unhandled error when trying to save a new order. Message: {ex.Message}");
+                return BadRequest(MessageResponse<String>.Fail($"The order could not be saved."));
+            }
         }
     }
 }

@@ -1,10 +1,8 @@
 ﻿using KonicaTracking.Data.Contracts;
-using KonicaTracking.Data.Models;
 using KonicaTracking.Models.Request;
 using KonicaTracking.Models.Response;
-
+using KonicaTracking.Services.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
 namespace KonicaTracking.Controllers
 {
@@ -12,14 +10,16 @@ namespace KonicaTracking.Controllers
     [Route("api/vehicles")]
     public class VehiclesController : Controller
     {
+        private readonly ILogger<VehiclesController> _logger;
         private readonly IVehiclesRepository _vehiclesRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VehiclesController"/> class.
         /// </summary>
         /// <param name="vehiclesRepository">The repository for retrieving information about vehicles.</param>
-        public VehiclesController(IVehiclesRepository vehiclesRepository)
+        public VehiclesController(ILogger<VehiclesController> logger, IVehiclesRepository vehiclesRepository)
         {
+            _logger = logger;
             _vehiclesRepository = vehiclesRepository;
         }
 
@@ -30,7 +30,7 @@ namespace KonicaTracking.Controllers
         [HttpGet]
         [Route("all")]
         public async Task<ActionResult<MessageResponse<ICollection<VehicleResponse>>>> AllVehiclesAsync()
-        {            
+        {
             try
             {
                 // Repository response.
@@ -47,26 +47,33 @@ namespace KonicaTracking.Controllers
             }
             catch (Exception ex)
             {
-                //ToDo: Implementar el logger
-               
-                return BadRequest(MessageResponse<String>.Fail("No se pudo obtener el listado de vehiculos."));
+                _logger.LogError($"Unhandled error when trying to request AllVehicle. Message: {ex.Message}");
+                return BadRequest(MessageResponse<String>.Fail($"No se pudo obtener el listado de vehiculos."));
             }
         }
-        
+
         /// <summary>
         /// Inserts a new vehicle into the system.
         /// </summary>
         /// <param name="vehicle">The vehicle object to insert.</param>
         /// <returns>An IActionResult indicating the result of the insert operation.</returns>
         [HttpPost("insert")]
-        public async Task<IActionResult> InsertVehicleAsync([FromBody] VehicleRequest vehicle)
+        public async Task<IActionResult> InsertVehicleAsync([FromBody] AddVehicleRequest vehicle)
         {
-            var result = await _vehiclesRepository.InsertVehicleAsync(vehicle);
-            if (result)
+            try
             {
-                return Ok(MessageResponse<String>.Success("Vehicle added successfully."));
+                var result = await _vehiclesRepository.InsertVehicleAsync(vehicle);
+                if (result)
+                {
+                    return Ok(MessageResponse<String>.Success($"Vehicle added successfully."));
+                }
+                return BadRequest(MessageResponse<String>.Fail($"Failed to add the vehicle."));
             }
-            return BadRequest(MessageResponse<String>.Fail("Failed to add the vehicle."));
+            catch (Exception ex)
+            {
+                _logger.LogError($"Unhandled error when trying to add new vehicle. Message: {ex.Message}");
+                return BadRequest(MessageResponse<String>.Fail($"Failed to add the vehicle."));
+            }
         }
 
         /// <summary>
@@ -76,16 +83,26 @@ namespace KonicaTracking.Controllers
         /// <param name="location">The new location object.</param>
         /// <returns>An IActionResult indicating the result of the update operation.</returns>
         [HttpPut("update-location/{vehicleId}")]
-        public async Task<IActionResult> UpdateVehicleLocationAsync(int vehicleId, [FromBody] CurrentLocation location)
+        public async Task<IActionResult> UpdateVehicleLocationAsync(int vehicleId, [FromBody] LocalitationRequest location)
         {
-            var result = await _vehiclesRepository.UpdateVehicleLocationAsync(vehicleId, location);
-            if (result)
+            try
             {
-                return Ok(MessageResponse<String>.Success("Vehicle location updated successfully."));
+                var result = await _vehiclesRepository.UpdateVehicleLocationAsync(vehicleId, location);
+                if (result)
+                {
+                    return Ok(MessageResponse<String>.Success("Vehicle location updated successfully."));
+                }
+                return NotFound(MessageResponse<String>.Fail("Vehicle not found or failed to update location."));
             }
-            return NotFound(MessageResponse<String>.Fail("Vehicle not found or failed to update location."));
+            catch (Exception ex)
+            {
+                _logger.LogError($"Unhandled error when trying to update the vehicle with id {vehicleId}. Message: {ex.Message}");
+                return BadRequest(MessageResponse<String>.Fail($"Failed to update the vehicle."));
+            }
         }
 
+        // ToDo: Hacer refactorizacion y eliminar servicios que no estas usando
+        // como el de currentlocation y el history.
         /// <summary>
         /// Retrieves the location of a specific vehicle.
         /// </summary>
@@ -94,12 +111,20 @@ namespace KonicaTracking.Controllers
         [HttpGet("location/{vehicleId}")]
         public async Task<IActionResult> GetVehicleLocationAsync(int vehicleId)
         {
-            var location = await _vehiclesRepository.GetVehicleLocationAsync(vehicleId);
-            if (location != null)
+            try
             {
-                return Ok(location);
+                var location = await _vehiclesRepository.GetVehicleLocationAsync(vehicleId);
+                if (location != null)
+                {
+                    return Ok(MessageResponse<ILocation>.Success(location));
+                }
+                return NotFound(MessageResponse<String>.Fail("Vehicle not found."));
             }
-            return NotFound(MessageResponse<String>.Fail("Vehicle not found."));
+            catch (Exception ex)
+            {
+                _logger.LogError($"Unhandled error when trying to get the localitation of the vehicle with id {vehicleId}. Message: {ex.Message}");
+                return BadRequest(MessageResponse<String>.Fail($"Failed to get the localitation of the vehicle."));
+            }
         }
     }
 }

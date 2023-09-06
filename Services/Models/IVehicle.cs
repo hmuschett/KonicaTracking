@@ -1,6 +1,4 @@
-﻿using KonicaTracking.Data.Models;
-
-namespace KonicaTracking.Services.Models
+﻿namespace KonicaTracking.Services.Models
 {
     public interface IVehicle
     {
