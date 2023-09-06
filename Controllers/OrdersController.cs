@@ -1,6 +1,7 @@
 ﻿using KonicaTracking.Data.Contracts;
 using KonicaTracking.Models.Request;
 using KonicaTracking.Models.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KonicaTracking.Controllers
@@ -32,6 +33,7 @@ namespace KonicaTracking.Controllers
         /// <param name="newOrder">The order details to be added.</param>
         /// <returns>A message response indicating the result of the operation.</returns>
         [HttpPost]
+        [Authorize]
         [Route("insert")]
         public async Task<IActionResult> InsertOrder([FromBody] AddOrderRequest newOrder)
         {
@@ -54,6 +56,7 @@ namespace KonicaTracking.Controllers
         /// <param name="id">The ID of the order to be deleted.</param>
         /// <returns>An IActionResult indicating the result of the delete operation.</returns>
         [HttpDelete]
+        [Authorize]
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
@@ -81,6 +84,7 @@ namespace KonicaTracking.Controllers
         /// <param name="orderId">The ID of the order.</param>
         /// <param name="vehicleId">The ID of the vehicle to assign.</param>
         /// <returns>An IActionResult indicating the result of the assignment.</returns>
+        [Authorize]
         [HttpPut("{orderId}/assign-vehicle/{vehicleId}")]
         public async Task<IActionResult> AssignVehicleToOrder(int orderId, int vehicleId)
         {
@@ -106,6 +110,7 @@ namespace KonicaTracking.Controllers
         /// </summary>
         /// <param name="orderId">The ID of the order.</param>
         /// <returns>An IActionResult with the order and vehicle location or an error message.</returns>
+        [Authorize]
         [HttpGet("{orderId}/location")]
         public async Task<IActionResult> GetOrderLocation(int orderId)
         {

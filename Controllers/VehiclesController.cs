@@ -2,6 +2,7 @@
 using KonicaTracking.Models.Request;
 using KonicaTracking.Models.Response;
 using KonicaTracking.Services.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KonicaTracking.Controllers
@@ -28,6 +29,7 @@ namespace KonicaTracking.Controllers
         /// </summary>
         /// <returns>An asynchronous task that represents the action's result, which contains a collection of vehicles.</returns>
         [HttpGet]
+        [Authorize]
         [Route("all")]
         public async Task<ActionResult<MessageResponse<ICollection<VehicleResponse>>>> AllVehiclesAsync()
         {
@@ -57,6 +59,7 @@ namespace KonicaTracking.Controllers
         /// </summary>
         /// <param name="vehicle">The vehicle object to insert.</param>
         /// <returns>An IActionResult indicating the result of the insert operation.</returns>
+        [Authorize]
         [HttpPost("insert")]
         public async Task<IActionResult> InsertVehicleAsync([FromBody] AddVehicleRequest vehicle)
         {
@@ -82,6 +85,7 @@ namespace KonicaTracking.Controllers
         /// <param name="vehicleId">The ID of the vehicle.</param>
         /// <param name="location">The new location object.</param>
         /// <returns>An IActionResult indicating the result of the update operation.</returns>
+        [Authorize]
         [HttpPut("update-location/{vehicleId}")]
         public async Task<IActionResult> UpdateVehicleLocationAsync(int vehicleId, [FromBody] LocalitationRequest location)
         {
@@ -106,6 +110,7 @@ namespace KonicaTracking.Controllers
         /// </summary>
         /// <param name="vehicleId">The ID of the vehicle.</param>
         /// <returns>An IActionResult with the vehicle location or an error message.</returns>
+        [Authorize]
         [HttpGet("location/{vehicleId}")]
         public async Task<IActionResult> GetVehicleLocationAsync(int vehicleId)
         {
