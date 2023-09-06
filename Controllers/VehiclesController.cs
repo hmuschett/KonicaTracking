@@ -101,8 +101,6 @@ namespace KonicaTracking.Controllers
             }
         }
 
-        // ToDo: Hacer refactorizacion y eliminar servicios que no estas usando
-        // como el de currentlocation y el history.
         /// <summary>
         /// Retrieves the location of a specific vehicle.
         /// </summary>

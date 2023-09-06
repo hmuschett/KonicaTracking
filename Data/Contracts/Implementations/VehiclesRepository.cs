@@ -2,7 +2,7 @@
 using KonicaTracking.Data.Models;
 using KonicaTracking.Services.Models;
 using Microsoft.EntityFrameworkCore;
-
+using System.Linq;
 
 namespace KonicaTracking.Data.Contracts.Implementations
 {

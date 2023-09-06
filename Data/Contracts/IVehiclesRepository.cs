@@ -1,4 +1,5 @@
-﻿using KonicaTracking.Services.Models;
+﻿using KonicaTracking.Data.Models;
+using KonicaTracking.Services.Models;
 
 namespace KonicaTracking.Data.Contracts
 {
