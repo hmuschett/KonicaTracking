@@ -36,6 +36,6 @@ namespace KonicaTracking.Data.Contracts
         /// </summary>
         /// <param name="orderId">The orderId to be search.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public Task<(Order order, ILocation location)> GetOrderAndVehicleLocationAsync(int orderId);
+        public Task<(IOrder order, ILocation location)> GetOrderAndVehicleLocationAsync(int orderId);
     }
 }

@@ -73,7 +73,7 @@ namespace KonicaTracking.Data.Contracts.Implementations
         /// </summary>
         /// <param name="orderId">The ID of the order.</param>
         /// <returns>An object containing the order and vehicle location or null if not found.</returns>
-        public async Task<(Order order, ILocation location)> GetOrderAndVehicleLocationAsync(int orderId)
+        public async Task<(IOrder order, ILocation location)> GetOrderAndVehicleLocationAsync(int orderId)
         {
             var order = await _context.Orders
                                       .Include(o => o.AssignedVehicleObject)                                      

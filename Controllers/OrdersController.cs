@@ -14,14 +14,16 @@ namespace KonicaTracking.Controllers
     public class OrdersController : Controller
     {
         private readonly IOrdersRepository _ordersRepository;
+        private readonly ILogger<OrdersController> _logger;
 
         /// <summary>
         /// Initialize a new instance of <see cref="OrdersController"/> class.
         /// </summary>
-        /// <param name="loggerManager"></param>
+        /// <param name="logger"></param>
         /// <param name="ordersRepository"></param>
-        public OrdersController( IOrdersRepository ordersRepository)
+        public OrdersController(ILogger<OrdersController> logger,IOrdersRepository ordersRepository)
         {
+            _logger = logger;
             _ordersRepository = ordersRepository;
         }
 
@@ -36,13 +38,16 @@ namespace KonicaTracking.Controllers
         {
             try
             {
-                if (await _ordersRepository.CreateOrderAsync(newOrder)) 
-                    return Ok(MessageResponse<String>.Success($"Se ha guardado la nueva orden."));
-                return Ok(MessageResponse<String>.Fail($"No se ha podido guardar el pedido y se desconoce la causa."));
+                _logger.LogDebug($"Retrive all orders");
+                _logger.LogError($"Unhandled error when trying to save a new order. Message:");
+                if (await _ordersRepository.CreateOrderAsync(newOrder))
+                    return Ok(MessageResponse<String>.Success($"The new order has been saved."));
+                return Ok(MessageResponse<String>.Fail($"The order could not be saved and the cause is unknown."));
             }
             catch (Exception ex)
             {
-                return BadRequest(MessageResponse<String>.Fail($"No se ha podido guardar el pedido."));
+                _logger.LogError($"Unhandled error when trying to save a new order. Message: {ex.Message}");
+                return BadRequest(MessageResponse<String>.Fail($"The order could not be saved."));
             }
         }
 
