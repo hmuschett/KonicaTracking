@@ -1,5 +1,6 @@
 ﻿using KonicaTracking.Data.Contracts;
 using KonicaTracking.Data.Models;
+using KonicaTracking.Models.Request;
 using KonicaTracking.Models.Response;
 
 using Microsoft.AspNetCore.Mvc;
@@ -29,8 +30,7 @@ namespace KonicaTracking.Controllers
         [HttpGet]
         [Route("all")]
         public async Task<ActionResult<MessageResponse<ICollection<VehicleResponse>>>> AllVehiclesAsync()
-        {
-            
+        {            
             try
             {
                 // Repository response.
@@ -51,6 +51,55 @@ namespace KonicaTracking.Controllers
                
                 return BadRequest(MessageResponse<String>.Fail("No se pudo obtener el listado de vehiculos."));
             }
+        }
+        
+        /// <summary>
+        /// Inserts a new vehicle into the system.
+        /// </summary>
+        /// <param name="vehicle">The vehicle object to insert.</param>
+        /// <returns>An IActionResult indicating the result of the insert operation.</returns>
+        [HttpPost("insert")]
+        public async Task<IActionResult> InsertVehicleAsync([FromBody] VehicleRequest vehicle)
+        {
+            var result = await _vehiclesRepository.InsertVehicleAsync(vehicle);
+            if (result)
+            {
+                return Ok(MessageResponse<String>.Success("Vehicle added successfully."));
+            }
+            return BadRequest(MessageResponse<String>.Fail("Failed to add the vehicle."));
+        }
+
+        /// <summary>
+        /// Updates the location of a specific vehicle.
+        /// </summary>
+        /// <param name="vehicleId">The ID of the vehicle.</param>
+        /// <param name="location">The new location object.</param>
+        /// <returns>An IActionResult indicating the result of the update operation.</returns>
+        [HttpPut("update-location/{vehicleId}")]
+        public async Task<IActionResult> UpdateVehicleLocationAsync(int vehicleId, [FromBody] CurrentLocation location)
+        {
+            var result = await _vehiclesRepository.UpdateVehicleLocationAsync(vehicleId, location);
+            if (result)
+            {
+                return Ok(MessageResponse<String>.Success("Vehicle location updated successfully."));
+            }
+            return NotFound(MessageResponse<String>.Fail("Vehicle not found or failed to update location."));
+        }
+
+        /// <summary>
+        /// Retrieves the location of a specific vehicle.
+        /// </summary>
+        /// <param name="vehicleId">The ID of the vehicle.</param>
+        /// <returns>An IActionResult with the vehicle location or an error message.</returns>
+        [HttpGet("location/{vehicleId}")]
+        public async Task<IActionResult> GetVehicleLocationAsync(int vehicleId)
+        {
+            var location = await _vehiclesRepository.GetVehicleLocationAsync(vehicleId);
+            if (location != null)
+            {
+                return Ok(location);
+            }
+            return NotFound(MessageResponse<String>.Fail("Vehicle not found."));
         }
     }
 }

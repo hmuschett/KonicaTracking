@@ -1,28 +1,11 @@
 ﻿using KonicaTracking.Data.Contracts;
 using KonicaTracking.Data.Models;
+using KonicaTracking.Models.Request;
 using KonicaTracking.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KonicaTracking.Controllers
 {
-    public record NewOrder
-    {
-        /// <summary>
-        /// Gets or sets the description of the order.
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Gets or sets the id vehicle.
-        /// </summary>
-        public int AssignedVehicleId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the status of the order.
-        /// </summary>
-        public OrderStatus Status { get; private set; } = OrderStatus.Placed;
-    }
-
     /// <summary>
     /// Controller with orders endpoints.
     /// </summary>
@@ -42,19 +25,80 @@ namespace KonicaTracking.Controllers
             _ordersRepository = ordersRepository;
         }
 
+        /// <summary>
+        /// Adds a new order to the system.
+        /// </summary>
+        /// <param name="newOrder">The order details to be added.</param>
+        /// <returns>A message response indicating the result of the operation.</returns>
         [HttpPost]
         [Route("add")]
-        public async Task<ActionResult<MessageResponse<String>>> AddOrder([FromBody] OrderResponse newOrder)
+        public async Task<ActionResult<MessageResponse<String>>> AddOrder([FromBody] OrderRequest newOrder)
         {
             try
             {
-                if (await _ordersRepository.CreateOrderAsync(newOrder)) return Ok(MessageResponse<String>.Success($"Se ha guardado la nueva orden."));
+                if (await _ordersRepository.CreateOrderAsync(newOrder)) 
+                    return Ok(MessageResponse<String>.Success($"Se ha guardado la nueva orden."));
                 return Ok(MessageResponse<String>.Fail($"No se ha podido guardar el pedido y se desconoce la causa."));
             }
             catch (Exception ex)
             {
                 return BadRequest(MessageResponse<String>.Fail($"No se ha podido guardar el pedido."));
             }
+        }
+
+        /// <summary>
+        /// Deletes an existing order based on the provided ID.
+        /// </summary>
+        /// <param name="id">The ID of the order to be deleted.</param>
+        /// <returns>An IActionResult indicating the result of the delete operation.</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrder(int id)
+        {
+            var result = await _ordersRepository.DeleteOrderAsync(id);
+            if (!result)
+            {
+                return NotFound(MessageResponse<String>.Success("Order not found."));
+            }
+
+            return NoContent(); // Devuelve un 204 No Content cuando la eliminación es exitosa.
+        }
+
+        /// <summary>
+        /// Assigns a vehicle to an order.
+        /// </summary>
+        /// <param name="orderId">The ID of the order.</param>
+        /// <param name="vehicleId">The ID of the vehicle to assign.</param>
+        /// <returns>An IActionResult indicating the result of the assignment.</returns>
+        [HttpPut("{orderId}/assign-vehicle/{vehicleId}")]
+        public async Task<IActionResult> AssignVehicleToOrder(int orderId, int vehicleId)
+        {
+            var result = await _ordersRepository.AssignVehicleToOrderAsync(orderId, vehicleId);
+            if (result)
+            {
+                return Ok(MessageResponse<String>.Success("Vehicle assigned to order successfully." ));
+            }
+            return NotFound(MessageResponse<String>.Success("Order not found or failed to assign vehicle."));
+        }
+
+        /// <summary>
+        /// Retrieves the order and its associated vehicle's location using the order ID.
+        /// </summary>
+        /// <param name="orderId">The ID of the order.</param>
+        /// <returns>An IActionResult with the order and vehicle location or an error message.</returns>
+        [HttpGet("{orderId}/location")]
+        public async Task<IActionResult> GetOrderAndVehicleLocation(int orderId)
+        {
+            var (order, vehicleLocation) = await _ordersRepository.GetOrderAndVehicleLocationAsync(orderId);
+            if (order == null || vehicleLocation == null)
+            {
+                return NotFound(MessageResponse<String>.Success("Order or vehicle not found." ));
+            }
+
+            return Ok(new
+            {
+                Order = order,
+                VehicleLocation = vehicleLocation
+            });
         }
     }
 }
