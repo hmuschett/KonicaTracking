@@ -1,6 +1,8 @@
 ﻿using KonicaTracking.Data.Context;
 using KonicaTracking.Data.Models;
 using KonicaTracking.Services.Models;
+using KonicaTracking.SignalRComunication;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
@@ -13,15 +15,17 @@ namespace KonicaTracking.Data.Contracts.Implementations
     {
         private readonly ILogger<VehiclesRepository> _logger;
         private readonly AppDbContext _context;
+        private readonly IHubContext<VehicleLocationHub> _hubContext;
 
         /// <summary>
         /// Initialize a new instance of <see cref="VehiclesRepository"/> class.
         /// </summary>
         /// <param name="context">The database context for accessing vehicle data.</param>
-        public VehiclesRepository(ILogger<VehiclesRepository> logger, AppDbContext context)
+        public VehiclesRepository(ILogger<VehiclesRepository> logger, AppDbContext context, IHubContext<VehicleLocationHub> hubContext)
         {
             _logger = logger;
             _context = context;
+            _hubContext = hubContext;
         }
 
         /// <inheritdoc />
@@ -60,6 +64,10 @@ namespace KonicaTracking.Data.Contracts.Implementations
             // Now update the current location
             vehicle.CurrentLocationObject.Latitude = newLocation.Latitude;
             vehicle.CurrentLocationObject.Longitude = newLocation.Longitude;
+
+            // Send updated loqations to real time clients
+            await _hubContext.Clients.All.SendAsync("receivevehiclelocation", vehicleId, newLocation.Latitude,
+                                                    newLocation.Longitude);
 
             return await _context.SaveChangesAsync() > 0;
         }

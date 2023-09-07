@@ -1,6 +1,7 @@
 using KonicaTracking.Data.Context;
 using KonicaTracking.Data.Register;
 using KonicaTracking.Services;
+using KonicaTracking.SignalRComunication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -67,6 +68,17 @@ try
             };
         });
 
+    //Config SignalR
+    builder.Services.AddSignalR();
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("CorsPolicy", builder => builder
+            .WithOrigins("null")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+    });
+
     var app = builder.Build();
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -79,6 +91,9 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+
+    app.MapHub<VehicleLocationHub>("/vehicleLocationHub");
+    app.UseCors("CorsPolicy");
 
     app.MapControllers();
 
